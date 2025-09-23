@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scam Proof Voicemail</title>
+    <style>
+        body { font-family: sans-serif; text-align: center; margin-top: 50px; }
+        input, button { padding: 10px; margin: 5px; }
+    </style>
+</head>
+<body>
+
+    <h1>Scam-Proof Voicemail</h1>
+    <p>A simple tool to check and report scam phone numbers.</p>
+
+    <input type="text" id="phoneNumber" placeholder="Enter phone number (e.g., 123-456-7899)">
+    <button onclick="checkNumber()">Check Number</button>
+    <button onclick="reportNumber()">Report as Scam</button>
+
+    <h2 id="result"></h2>
+
+<script>
+    // This is our simple, hard-coded "database" of known scam numbers.
+    let knownScams = [
+        "555-123-4567",
+        "800-555-0199",
+        "900-555-0199"
+    ];
+
+    function checkNumber() {
+        // Get the phone number from the input field
+        const inputNumber = document.getElementById("phoneNumber").value;
+        const resultElement = document.getElementById("result");
+
+        // Clean the input to remove any non-numeric characters for a better match
+        const cleanedNumber = inputNumber.replace(/[^0-9]/g, '');
+
+        // Check if the input number exists in our list
+        if (knownScams.includes(inputNumber)) {
+            resultElement.textContent = "⚠️ Warning: This is a known scam number.";
+            resultElement.style.color = "red";
+        } else {
+            resultElement.textContent = "✅ This number is not in our database.";
+            resultElement.style.color = "green";
+        }
+    }
+
+    function reportNumber() {
+        // Get the phone number to be reported
+        const inputNumber = document.getElementById("phoneNumber").value;
+        const resultElement = document.getElementById("result");
+
+        // Check if the input is not empty
+        if (inputNumber) {
+            // Add the new number to our list
+            knownScams.push(inputNumber);
+            resultElement.textContent = `✅ Thank you for reporting ${inputNumber}! It has been added to our database.`;
+            resultElement.style.color = "blue";
+        } else {
+            resultElement.textContent = "Please enter a number to report.";
+            resultElement.style.color = "orange";
+        }
+    }
+</script>
+
+</body>
+</html>
