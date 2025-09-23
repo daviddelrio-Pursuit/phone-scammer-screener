@@ -23,9 +23,16 @@
 <script>
     // This is our simple, hard-coded "database" of known scam numbers.
     let knownScams = [
-        "555-123-4567",
-        "800-555-0199",
-        "900-555-0199"
+        "800-111-0000",  // Toll-free number pattern
+        "888-123-4567",  // Common toll-free scam
+        "877-999-9999",  // Repetitive number pattern
+        "866-419-0123",  // Tech support scam pattern
+        "855-555-1234",  // IRS scam pattern
+        "900-555-0199",  // Premium rate number
+        "844-777-8888",  // Bank scam pattern
+        "833-123-0000",  // Lottery scam pattern
+        "876-234-5678",  // Jamaica area code (common in lottery scams)
+        "649-999-8888"   // Caribbean area code (common in prize scams)
     ];
 
     function checkNumber() {
