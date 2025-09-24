@@ -8,16 +8,6 @@ class ScamEntry {
     }
 }
 
-// Scam number entry structure
-class ScamEntry {
-    constructor(number, category = 'Unknown', description = '', timestamp = new Date()) {
-        this.number = number;
-        this.category = category;
-        this.description = description;
-        this.timestamp = timestamp;
-    }
-}
-
 // Initialize our database with default scam numbers and any stored reports
 const defaultScams = [
     new ScamEntry("800-111-0000", "Toll-free", "Common toll-free scam pattern"),
@@ -104,7 +94,9 @@ function formatPhoneNumber(number) {
     return digits;
 }
 
+// Initialize event listeners and UI
 document.addEventListener('DOMContentLoaded', function() {
+    // Set up phone number input formatting
     const phoneInput = document.getElementById('phoneNumber');
     phoneInput.addEventListener('input', function(e) {
         const input = e.target.value;
@@ -119,14 +111,30 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         }
     });
+
+    // Set up search functionality
+    const searchBox = document.getElementById('searchBox');
+    if (searchBox) {
+        searchBox.addEventListener('input', (e) => {
+            renderScamList(e.target.value);
+        });
+    }
+
+    // Initialize the UI
+    updateStats();
+    renderScamList();
 });
 
 function checkNumber() {
     const inputNumber = getDigitsOnly(document.getElementById("phoneNumber").value);
     const resultElement = document.getElementById("result");
-    const isScam = knownScams.some(scamNumber => getDigitsOnly(scamNumber) === inputNumber);
-    if (isScam) {
-        resultElement.textContent = "⚠️ This phone number is currently recognized as a scam number";
+    
+    const matchingEntry = knownScams.find(entry => 
+        getDigitsOnly(entry.number) === inputNumber
+    );
+
+    if (matchingEntry) {
+        resultElement.textContent = `⚠️ This phone number is currently recognized as a ${matchingEntry.category} scam`;
         resultElement.style.color = "red";
     } else {
         resultElement.textContent = "✅ This number is not in our database.";
@@ -135,46 +143,80 @@ function checkNumber() {
 }
 
 function reportNumber() {
-    const inputNumber = document.getElementById("phoneNumber").value;
+    const inputElement = document.getElementById("phoneNumber");
+    const inputNumber = getDigitsOnly(inputElement.value);
     const resultElement = document.getElementById("result");
-    if (inputNumber) {
-        const cleanedNumber = getDigitsOnly(inputNumber);
-        const isAlreadyReported = knownScams.some(number => getDigitsOnly(number) === cleanedNumber);
-        if (isAlreadyReported) {
-            resultElement.textContent = "This number has already been reported as a scam.";
-            resultElement.style.color = "orange";
-            return;
-        }
-        const formattedNumber = formatPhoneNumber(cleanedNumber);
-        knownScams.push(formattedNumber);
-        saveScamNumbers();
-        resultElement.textContent = `✅ Thank you for reporting ${formattedNumber}! It has been added to our database.`;
-        resultElement.style.color = "blue";
-    } else {
-        resultElement.textContent = "Please enter a number to report.";
-        resultElement.style.color = "orange";
-    }
-}
 
-function deleteNumber() {
-    const inputNumber = document.getElementById("phoneNumber").value;
-    const resultElement = document.getElementById("result");
     if (!inputNumber) {
-        resultElement.textContent = "Please enter a number to delete.";
+        resultElement.textContent = "Please enter a number to report.";
         resultElement.style.color = "orange";
         return;
     }
-    const cleanedNumber = getDigitsOnly(inputNumber);
-    const exists = knownScams.some(number => getDigitsOnly(number) === cleanedNumber);
-    if (!exists) {
+
+    if (inputNumber.length !== 10) {
+        resultElement.textContent = "Please enter a valid 10-digit phone number.";
+        resultElement.style.color = "orange";
+        return;
+    }
+
+    const isAlreadyReported = knownScams.some(entry => 
+        getDigitsOnly(entry.number) === inputNumber
+    );
+
+    if (isAlreadyReported) {
+        resultElement.textContent = "This number has already been reported as a scam.";
+        resultElement.style.color = "orange";
+        return;
+    }
+
+    // Prompt for additional details
+    const category = prompt("What type of scam is this? (e.g., IRS, Tech Support, Banking, etc.)") || "Unknown";
+    const description = prompt("Please provide any additional details about the scam:") || "";
+
+    const formattedNumber = formatPhoneNumber(inputNumber);
+    const newEntry = new ScamEntry(formattedNumber, category, description);
+    
+    knownScams.push(newEntry);
+    saveScamNumbers();
+    updateStats();
+    renderScamList();
+    
+    resultElement.textContent = `✅ Thank you for reporting ${formattedNumber}!`;
+    resultElement.style.color = "blue";
+    inputElement.value = '';
+}
+
+function deleteNumber() {
+    const inputElement = document.getElementById("phoneNumber");
+    const inputNumber = getDigitsOnly(inputElement.value);
+    const resultElement = document.getElementById("result");
+
+    if (!inputNumber || inputNumber.length !== 10) {
+        resultElement.textContent = "Please enter a valid phone number to delete.";
+        resultElement.style.color = "orange";
+        return;
+    }
+
+    const matchingEntry = knownScams.find(entry => 
+        getDigitsOnly(entry.number) === inputNumber
+    );
+
+    if (!matchingEntry) {
         resultElement.textContent = "This number is not in the database.";
         resultElement.style.color = "orange";
         return;
     }
-    if (confirm("Are you sure you want to remove this phone number from the database?")) {
-        knownScams = knownScams.filter(number => getDigitsOnly(number) !== cleanedNumber);
+
+    if (confirm(`Are you sure you want to remove this ${matchingEntry.category} scam number from the database?`)) {
+        knownScams = knownScams.filter(entry => 
+            getDigitsOnly(entry.number) !== inputNumber
+        );
         saveScamNumbers();
+        updateStats();
+        renderScamList();
+        
         resultElement.textContent = `✅ Phone number ${formatPhoneNumber(inputNumber)} has been removed from the database.`;
         resultElement.style.color = "green";
+        inputElement.value = '';
     }
 }
