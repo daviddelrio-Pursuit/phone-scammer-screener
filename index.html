@@ -21,8 +21,8 @@
     <h2 id="result"></h2>
 
 <script>
-    // This is our simple, hard-coded "database" of known scam numbers.
-    let knownScams = [
+    // Initialize our database with default scam numbers and any stored reports
+    const defaultScams = [
         "800-111-0000",  // Toll-free number pattern
         "888-123-4567",  // Common toll-free scam
         "877-999-9999",  // Repetitive number pattern
@@ -34,6 +34,14 @@
         "876-234-5678",  // Jamaica area code (common in lottery scams)
         "649-999-8888"   // Caribbean area code (common in prize scams)
     ];
+
+    // Load numbers from localStorage or use defaults if none exist
+    let knownScams = JSON.parse(localStorage.getItem('scamNumbers')) || defaultScams;
+
+    // Function to save numbers to localStorage
+    function saveScamNumbers() {
+        localStorage.setItem('scamNumbers', JSON.stringify(knownScams));
+    }
 
     function getDigitsOnly(number) {
         // Remove everything except digits
@@ -67,11 +75,26 @@
 
         // Check if the input is not empty
         if (inputNumber) {
-            // Format the number consistently before adding to the database
-            const formattedNumber = formatPhoneNumber(inputNumber);
+            const cleanedNumber = getDigitsOnly(inputNumber);
+            
+            // Check if number is already reported
+            const isAlreadyReported = knownScams.some(number => 
+                getDigitsOnly(number) === cleanedNumber
+            );
+
+            if (isAlreadyReported) {
+                resultElement.textContent = "This number has already been reported as a scam.";
+                resultElement.style.color = "orange";
+                return;
+            }
+
+            // Format number consistently (just digits for storage)
             // Add the new number to our list
-            knownScams.push(formattedNumber);
-            resultElement.textContent = `✅ Thank you for reporting ${formattedNumber}! It has been added to our database.`;
+            knownScams.push(cleanedNumber);
+            // Save to localStorage
+            saveScamNumbers();
+            
+            resultElement.textContent = `✅ Thank you for reporting ${inputNumber}! It has been added to our database.`;
             resultElement.style.color = "blue";
         } else {
             resultElement.textContent = "Please enter a number to report.";
