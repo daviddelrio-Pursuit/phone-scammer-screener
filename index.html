@@ -4,10 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Scam Proof Voicemail</title>
-    <style>
-        body { font-family: sans-serif; text-align: center; margin-top: 50px; }
-        input, button { padding: 10px; margin: 5px; }
-    </style>
+    <link rel="stylesheet" href="style.css">
+    
 </head>
 <body>
 
@@ -55,88 +53,7 @@
         
         // Format as XXX-XXX-XXXX if we have 10 digits
         if (digits.length === 10) {
-            return digits.replace(/(\d{3})(\d{3})(\d{4})/, '$1-$2-$3');
-        }
-        return digits;
-    }
-
-    // Add event listener to format phone number as user types
-    document.getElementById('phoneNumber').addEventListener('input', function(e) {
-        const input = e.target.value;
-        const digits = getDigitsOnly(input);
-        
-        if (digits.length <= 10) {
-            // Format the number with appropriate dashes
-            if (digits.length > 6) {
-                e.target.value = digits.slice(0,3) + '-' + digits.slice(3,6) + '-' + digits.slice(6);
-            } else if (digits.length > 3) {
-                e.target.value = digits.slice(0,3) + '-' + digits.slice(3);
-            } else {
-                e.target.value = digits;
-            }
-        }
-    });
-
-    function deleteNumber() {
-        const inputNumber = document.getElementById("phoneNumber").value;
-        const resultElement = document.getElementById("result");
-        
-        if (!inputNumber) {
-            resultElement.textContent = "Please enter a number to delete.";
-            resultElement.style.color = "orange";
-            return;
-        }
-
-        const cleanedNumber = getDigitsOnly(inputNumber);
-        const exists = knownScams.some(number => getDigitsOnly(number) === cleanedNumber);
-
-        if (!exists) {
-            resultElement.textContent = "This number is not in the database.";
-            resultElement.style.color = "orange";
-            return;
-        }
-
-        if (confirm("Are you sure you want to remove this phone number from the database?")) {
-            // Remove the number
-            knownScams = knownScams.filter(number => getDigitsOnly(number) !== cleanedNumber);
-            saveScamNumbers();
-            resultElement.textContent = `✅ Phone number ${formatPhoneNumber(inputNumber)} has been removed from the database.`;
-            resultElement.style.color = "green";
-        }
-    }
-
-    function checkNumber() {
-        // Get the phone number from the input field and clean it
-        const inputNumber = getDigitsOnly(document.getElementById("phoneNumber").value);
-        const resultElement = document.getElementById("result");
-
-        // Compare only the digits
-        const isScam = knownScams.some(scamNumber => 
-            getDigitsOnly(scamNumber) === inputNumber
-        );
-
-        // Check if the input number exists in our list
-        if (isScam) {
-            resultElement.textContent = "⚠️ This phone number is currently recognized as a scam number";
-            resultElement.style.color = "red";
-        } else {
-            resultElement.textContent = "✅ This number is not in our database.";
-            resultElement.style.color = "green";
-        }
-    }
-
-    function reportNumber() {
-        // Get the phone number to be reported
-        const inputNumber = document.getElementById("phoneNumber").value;
-        const resultElement = document.getElementById("result");
-
-        // Check if the input is not empty
-        if (inputNumber) {
-            const cleanedNumber = getDigitsOnly(inputNumber);
-            
-            // Check if number is already reported
-            const isAlreadyReported = knownScams.some(number => 
-                getDigitsOnly(number) === cleanedNumber
+        <script src="app.js"></script>
             );
 
             if (isAlreadyReported) {
