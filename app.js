@@ -1,22 +1,96 @@
+// Scam number entry structure
+class ScamEntry {
+    constructor(number, category = 'Unknown', description = '', timestamp = new Date()) {
+        this.number = number;
+        this.category = category;
+        this.description = description;
+        this.timestamp = timestamp;
+    }
+}
+
+// Scam number entry structure
+class ScamEntry {
+    constructor(number, category = 'Unknown', description = '', timestamp = new Date()) {
+        this.number = number;
+        this.category = category;
+        this.description = description;
+        this.timestamp = timestamp;
+    }
+}
+
 // Initialize our database with default scam numbers and any stored reports
 const defaultScams = [
-    "800-111-0000",  // Toll-free number pattern
-    "888-123-4567",  // Common toll-free scam
-    "877-999-9999",  // Repetitive number pattern
-    "866-419-0123",  // Tech support scam pattern
-    "855-555-1234",  // IRS scam pattern
-    "900-555-0199",  // Premium rate number
-    "844-777-8888",  // Bank scam pattern
-    "833-123-0000",  // Lottery scam pattern
-    "876-234-5678",  // Jamaica area code (common in lottery scams)
-    "649-999-8888"   // Caribbean area code (common in prize scams)
+    new ScamEntry("800-111-0000", "Toll-free", "Common toll-free scam pattern"),
+    new ScamEntry("888-123-4567", "Tech Support", "Tech support scam"),
+    new ScamEntry("877-999-9999", "IRS", "IRS scam pattern"),
+    new ScamEntry("866-419-0123", "Tech Support", "Tech support scam"),
+    new ScamEntry("855-555-1234", "Government", "Government agency scam"),
+    new ScamEntry("900-555-0199", "Premium", "Premium rate number scam"),
+    new ScamEntry("844-777-8888", "Banking", "Bank scam pattern"),
+    new ScamEntry("833-123-0000", "Lottery", "Lottery scam pattern"),
+    new ScamEntry("876-234-5678", "Lottery", "Jamaica area code lottery scam"),
+    new ScamEntry("649-999-8888", "Prize", "Prize scam from Caribbean")
 ];
 
-let knownScams = JSON.parse(localStorage.getItem('scamNumbers')) || defaultScams;
+// Load numbers from localStorage or use defaults
+let knownScams = [];
+try {
+    const stored = JSON.parse(localStorage.getItem('scamNumbers'));
+    if (stored) {
+        knownScams = stored.map(entry => {
+            return new ScamEntry(
+                entry.number,
+                entry.category,
+                entry.description,
+                new Date(entry.timestamp)
+            );
+        });
+    } else {
+        knownScams = defaultScams;
+    }
+} catch (e) {
+    knownScams = defaultScams;
+}
 
 function saveScamNumbers() {
     localStorage.setItem('scamNumbers', JSON.stringify(knownScams));
 }
+
+// Update statistics
+function updateStats() {
+    const totalElement = document.getElementById('totalScams');
+    const recentElement = document.getElementById('recentScams');
+    
+    totalElement.textContent = knownScams.length;
+    
+    const today = new Date();
+    const recentCount = knownScams.filter(entry => {
+        const entryDate = new Date(entry.timestamp);
+        return entryDate.toDateString() === today.toDateString();
+    }).length;
+    
+    recentElement.textContent = recentCount;
+}
+
+// Render the scam list
+function renderScamList(searchTerm = '') {
+    const container = document.getElementById('scamListContainer');
+    const filteredScams = knownScams
+        .filter(entry => entry.number.includes(searchTerm) || 
+                        entry.category.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                        entry.description.toLowerCase().includes(searchTerm.toLowerCase()))
+        .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+
+    container.innerHTML = filteredScams.map(entry => `
+        <div class="scam-item">
+            <div class="scam-number">${entry.number}</div>
+            <div class="scam-details">
+                Category: ${entry.category} | 
+                Reported: ${new Date(entry.timestamp).toLocaleDateString()}
+                ${entry.description ? `<br>Details: ${entry.description}` : ''}
+            </div>
+        </div>
+    `).join('');
 
 function getDigitsOnly(number) {
     return number.replace(/\D/g, '');
