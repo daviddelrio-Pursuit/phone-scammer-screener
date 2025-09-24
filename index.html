@@ -14,9 +14,10 @@
     <h1>Scam-Proof Voicemail</h1>
     <p>A simple tool to check and report scam phone numbers.</p>
 
-    <input type="text" id="phoneNumber" placeholder="Enter phone number (any format)">
+    <input type="text" id="phoneNumber" placeholder="Enter phone number (e.g., 800-111-0000)" maxlength="12">
     <button onclick="checkNumber()">Check Number</button>
     <button onclick="reportNumber()">Report as Scam</button>
+    <button onclick="deleteNumber()">Delete Number</button>
 
     <h2 id="result"></h2>
 
@@ -46,6 +47,62 @@
     function getDigitsOnly(number) {
         // Remove everything except digits
         return number.replace(/\D/g, '');
+    }
+
+    function formatPhoneNumber(number) {
+        // Get only the digits
+        const digits = getDigitsOnly(number);
+        
+        // Format as XXX-XXX-XXXX if we have 10 digits
+        if (digits.length === 10) {
+            return digits.replace(/(\d{3})(\d{3})(\d{4})/, '$1-$2-$3');
+        }
+        return digits;
+    }
+
+    // Add event listener to format phone number as user types
+    document.getElementById('phoneNumber').addEventListener('input', function(e) {
+        const input = e.target.value;
+        const digits = getDigitsOnly(input);
+        
+        if (digits.length <= 10) {
+            // Format the number with appropriate dashes
+            if (digits.length > 6) {
+                e.target.value = digits.slice(0,3) + '-' + digits.slice(3,6) + '-' + digits.slice(6);
+            } else if (digits.length > 3) {
+                e.target.value = digits.slice(0,3) + '-' + digits.slice(3);
+            } else {
+                e.target.value = digits;
+            }
+        }
+    });
+
+    function deleteNumber() {
+        const inputNumber = document.getElementById("phoneNumber").value;
+        const resultElement = document.getElementById("result");
+        
+        if (!inputNumber) {
+            resultElement.textContent = "Please enter a number to delete.";
+            resultElement.style.color = "orange";
+            return;
+        }
+
+        const cleanedNumber = getDigitsOnly(inputNumber);
+        const exists = knownScams.some(number => getDigitsOnly(number) === cleanedNumber);
+
+        if (!exists) {
+            resultElement.textContent = "This number is not in the database.";
+            resultElement.style.color = "orange";
+            return;
+        }
+
+        if (confirm("Are you sure you want to remove this phone number from the database?")) {
+            // Remove the number
+            knownScams = knownScams.filter(number => getDigitsOnly(number) !== cleanedNumber);
+            saveScamNumbers();
+            resultElement.textContent = `✅ Phone number ${formatPhoneNumber(inputNumber)} has been removed from the database.`;
+            resultElement.style.color = "green";
+        }
     }
 
     function checkNumber() {
@@ -88,13 +145,13 @@
                 return;
             }
 
-            // Format number consistently (just digits for storage)
-            // Add the new number to our list
-            knownScams.push(cleanedNumber);
+            // Format number consistently and add to list
+            const formattedNumber = formatPhoneNumber(cleanedNumber);
+            knownScams.push(formattedNumber);
             // Save to localStorage
             saveScamNumbers();
             
-            resultElement.textContent = `✅ Thank you for reporting ${inputNumber}! It has been added to our database.`;
+            resultElement.textContent = `✅ Thank you for reporting ${formattedNumber}! It has been added to our database.`;
             resultElement.style.color = "blue";
         } else {
             resultElement.textContent = "Please enter a number to report.";
