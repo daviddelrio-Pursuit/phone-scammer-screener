@@ -62,6 +62,19 @@ function updateStats() {
     recentElement.textContent = recentCount;
 }
 
+// Utility functions
+function getDigitsOnly(number) {
+    return number.replace(/\D/g, '');
+}
+
+function formatPhoneNumber(number) {
+    const digits = getDigitsOnly(number);
+    if (digits.length === 10) {
+        return digits.replace(/(\d{3})(\d{3})(\d{4})/, '$1-$2-$3');
+    }
+    return digits;
+}
+
 // Render the scam list
 function renderScamList(searchTerm = '') {
     const container = document.getElementById('scamListContainer');
@@ -81,17 +94,6 @@ function renderScamList(searchTerm = '') {
             </div>
         </div>
     `).join('');
-
-function getDigitsOnly(number) {
-    return number.replace(/\D/g, '');
-}
-
-function formatPhoneNumber(number) {
-    const digits = getDigitsOnly(number);
-    if (digits.length === 10) {
-        return digits.replace(/(\d{3})(\d{3})(\d{4})/, '$1-$2-$3');
-    }
-    return digits;
 }
 
 // Initialize event listeners and UI
@@ -125,7 +127,8 @@ document.addEventListener('DOMContentLoaded', function() {
     renderScamList();
 });
 
-function checkNumber() {
+// Core functionality
+window.checkNumber = function() {
     const inputNumber = getDigitsOnly(document.getElementById("phoneNumber").value);
     const resultElement = document.getElementById("result");
     
@@ -142,7 +145,7 @@ function checkNumber() {
     }
 }
 
-function reportNumber() {
+window.reportNumber = function() {
     const inputElement = document.getElementById("phoneNumber");
     const inputNumber = getDigitsOnly(inputElement.value);
     const resultElement = document.getElementById("result");
@@ -186,7 +189,7 @@ function reportNumber() {
     inputElement.value = '';
 }
 
-function deleteNumber() {
+window.deleteNumber = function() {
     const inputElement = document.getElementById("phoneNumber");
     const inputNumber = getDigitsOnly(inputElement.value);
     const resultElement = document.getElementById("result");
