@@ -5,77 +5,43 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Scam Proof Voicemail</title>
     <link rel="stylesheet" href="style.css">
-    
 </head>
 <body>
+    <div class="container">
+        <h1>Scam-Proof Voicemail</h1>
+        <p class="description">Protect yourself from phone scams by checking and reporting suspicious numbers.</p>
 
-    <h1>Scam-Proof Voicemail</h1>
-    <p>A simple tool to check and report scam phone numbers.</p>
+        <div class="stats">
+            <div class="stat-item">
+                <div class="stat-number" id="totalScams">0</div>
+                <div class="stat-label">Total Scams Reported</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number" id="recentScams">0</div>
+                <div class="stat-label">Reports Today</div>
+            </div>
+        </div>
 
-    <input type="text" id="phoneNumber" placeholder="Enter phone number (e.g., 800-111-0000)" maxlength="12">
-    <button onclick="checkNumber()">Check Number</button>
-    <button onclick="reportNumber()">Report as Scam</button>
-    <button onclick="deleteNumber()">Delete Number</button>
+        <div class="input-group">
+            <input type="text" id="phoneNumber" placeholder="Enter phone number (e.g., 800-111-0000)" maxlength="12">
+            <div id="validation-message"></div>
+        </div>
 
-    <h2 id="result"></h2>
+        <div class="button-group">
+            <button onclick="checkNumber()" class="check-btn">Check Number</button>
+            <button onclick="reportNumber()" class="report-btn">Report as Scam</button>
+            <button onclick="deleteNumber()" class="delete-btn">Delete Number</button>
+        </div>
 
-<script>
-    // Initialize our database with default scam numbers and any stored reports
-    const defaultScams = [
-        "800-111-0000",  // Toll-free number pattern
-        "888-123-4567",  // Common toll-free scam
-        "877-999-9999",  // Repetitive number pattern
-        "866-419-0123",  // Tech support scam pattern
-        "855-555-1234",  // IRS scam pattern
-        "900-555-0199",  // Premium rate number
-        "844-777-8888",  // Bank scam pattern
-        "833-123-0000",  // Lottery scam pattern
-        "876-234-5678",  // Jamaica area code (common in lottery scams)
-        "649-999-8888"   // Caribbean area code (common in prize scams)
-    ];
+        <h2 id="result"></h2>
 
-    // Load numbers from localStorage or use defaults if none exist
-    let knownScams = JSON.parse(localStorage.getItem('scamNumbers')) || defaultScams;
+        <div class="scam-list">
+            <input type="text" class="search-box" id="searchBox" placeholder="Search reported numbers...">
+            <h3>Recently Reported Numbers</h3>
+            <div id="scamListContainer"></div>
+        </div>
+    </div>
 
-    // Function to save numbers to localStorage
-    function saveScamNumbers() {
-        localStorage.setItem('scamNumbers', JSON.stringify(knownScams));
-    }
-
-    function getDigitsOnly(number) {
-        // Remove everything except digits
-        return number.replace(/\D/g, '');
-    }
-
-    function formatPhoneNumber(number) {
-        // Get only the digits
-        const digits = getDigitsOnly(number);
-        
-        // Format as XXX-XXX-XXXX if we have 10 digits
-        if (digits.length === 10) {
-        <script src="app.js"></script>
-            );
-
-            if (isAlreadyReported) {
-                resultElement.textContent = "This number has already been reported as a scam.";
-                resultElement.style.color = "orange";
-                return;
-            }
-
-            // Format number consistently and add to list
-            const formattedNumber = formatPhoneNumber(cleanedNumber);
-            knownScams.push(formattedNumber);
-            // Save to localStorage
-            saveScamNumbers();
-            
-            resultElement.textContent = `✅ Thank you for reporting ${formattedNumber}! It has been added to our database.`;
-            resultElement.style.color = "blue";
-        } else {
-            resultElement.textContent = "Please enter a number to report.";
-            resultElement.style.color = "orange";
-        }
-    }
-</script>
-
+    <script src="app.js"></script>
 </body>
 </html>
