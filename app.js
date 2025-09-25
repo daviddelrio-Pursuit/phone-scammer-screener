@@ -42,6 +42,19 @@ try {
     knownScams = defaultScams;
 }
 
+// Utility functions
+function getDigitsOnly(number) {
+    return number.replace(/\D/g, '');
+}
+
+function formatPhoneNumber(number) {
+    const digits = getDigitsOnly(number);
+    if (digits.length === 10) {
+        return digits.replace(/(\d{3})(\d{3})(\d{4})/, '$1-$2-$3');
+    }
+    return digits;
+}
+
 function saveScamNumbers() {
     localStorage.setItem('scamNumbers', JSON.stringify(knownScams));
 }
@@ -60,19 +73,6 @@ function updateStats() {
     }).length;
     
     recentElement.textContent = recentCount;
-}
-
-// Utility functions
-function getDigitsOnly(number) {
-    return number.replace(/\D/g, '');
-}
-
-function formatPhoneNumber(number) {
-    const digits = getDigitsOnly(number);
-    if (digits.length === 10) {
-        return digits.replace(/(\d{3})(\d{3})(\d{4})/, '$1-$2-$3');
-    }
-    return digits;
 }
 
 // Render the scam list
@@ -96,41 +96,22 @@ function renderScamList(searchTerm = '') {
     `).join('');
 }
 
-// Initialize event listeners and UI
-document.addEventListener('DOMContentLoaded', function() {
-    // Set up phone number input formatting
-    const phoneInput = document.getElementById('phoneNumber');
-    phoneInput.addEventListener('input', function(e) {
-        const input = e.target.value;
-        const digits = getDigitsOnly(input);
-        if (digits.length <= 10) {
-            if (digits.length > 6) {
-                e.target.value = digits.slice(0,3) + '-' + digits.slice(3,6) + '-' + digits.slice(6);
-            } else if (digits.length > 3) {
-                e.target.value = digits.slice(0,3) + '-' + digits.slice(3);
-            } else {
-                e.target.value = digits;
-            }
-        }
-    });
-
-    // Set up search functionality
-    const searchBox = document.getElementById('searchBox');
-    if (searchBox) {
-        searchBox.addEventListener('input', (e) => {
-            renderScamList(e.target.value);
-        });
-    }
-
-    // Initialize the UI
-    updateStats();
-    renderScamList();
-});
-
-// Core functionality
+// Make functions globally available for HTML
 window.checkNumber = function() {
     const inputNumber = getDigitsOnly(document.getElementById("phoneNumber").value);
     const resultElement = document.getElementById("result");
+    
+    if (!inputNumber) {
+        resultElement.textContent = "Please enter a number to check.";
+        resultElement.style.color = "orange";
+        return;
+    }
+
+    if (inputNumber.length !== 10) {
+        resultElement.textContent = "Please enter a valid 10-digit phone number.";
+        resultElement.style.color = "orange";
+        return;
+    }
     
     const matchingEntry = knownScams.find(entry => 
         getDigitsOnly(entry.number) === inputNumber
@@ -143,7 +124,7 @@ window.checkNumber = function() {
         resultElement.textContent = "✅ This number is not in our database.";
         resultElement.style.color = "green";
     }
-}
+};
 
 window.reportNumber = function() {
     const inputElement = document.getElementById("phoneNumber");
@@ -187,7 +168,7 @@ window.reportNumber = function() {
     resultElement.textContent = `✅ Thank you for reporting ${formattedNumber}!`;
     resultElement.style.color = "blue";
     inputElement.value = '';
-}
+};
 
 window.deleteNumber = function() {
     const inputElement = document.getElementById("phoneNumber");
@@ -222,4 +203,35 @@ window.deleteNumber = function() {
         resultElement.style.color = "green";
         inputElement.value = '';
     }
-}
+};
+
+// Initialize event listeners and UI
+document.addEventListener('DOMContentLoaded', function() {
+    // Set up phone number input formatting
+    const phoneInput = document.getElementById('phoneNumber');
+    phoneInput.addEventListener('input', function(e) {
+        const input = e.target.value;
+        const digits = getDigitsOnly(input);
+        if (digits.length <= 10) {
+            if (digits.length > 6) {
+                e.target.value = digits.slice(0,3) + '-' + digits.slice(3,6) + '-' + digits.slice(6);
+            } else if (digits.length > 3) {
+                e.target.value = digits.slice(0,3) + '-' + digits.slice(3);
+            } else {
+                e.target.value = digits;
+            }
+        }
+    });
+
+    // Set up search functionality
+    const searchBox = document.getElementById('searchBox');
+    if (searchBox) {
+        searchBox.addEventListener('input', (e) => {
+            renderScamList(e.target.value);
+        });
+    }
+
+    // Initialize the UI
+    updateStats();
+    renderScamList();
+});
